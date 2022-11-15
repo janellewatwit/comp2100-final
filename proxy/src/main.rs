@@ -1,7 +1,7 @@
 use std::{net::{TcpListener, TcpStream}, io::{Write, Read, BufReader, BufRead}};
 
 fn check_blacklisted_ip(ip: &std::net::IpAddr) -> bool {
-	let mut file = std::fs::File::open("blacklist").unwrap();
+	let mut file = std::fs::File::open("../blacklist").unwrap();
 	let mut contents = String::new();
 	file.read_to_string(&mut contents).unwrap();
 	let blacklisted_ips: Vec<String> = contents.split("\n").map(|s: &str| s.to_string()).collect();
@@ -10,9 +10,9 @@ fn check_blacklisted_ip(ip: &std::net::IpAddr) -> bool {
 }
 
 fn handle_client(mut incoming_stream: TcpStream) {
-	let ip = incoming_stream.peer_addr().unwrap().ip();
+	let ip = incoming_stream.peer_addr().unwrap();
 	println!("{:?}", ip);
-	if check_blacklisted_ip(&ip) {
+	if check_blacklisted_ip(&ip.ip()) {
 		println!("Bad ip");
 		incoming_stream.write(b"Bad ip\n").unwrap();
 		return;

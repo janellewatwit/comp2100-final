@@ -1,7 +1,7 @@
 use std::{net::{TcpListener, TcpStream}, io::{Write, BufReader, BufRead}};
 
 fn handle_client(mut stream: TcpStream) {
-	let ip = stream.peer_addr().unwrap().ip();
+	let ip = stream.peer_addr().unwrap();
 	println!("{:?}", ip);
 
 	stream.write(b"Hello World!\n").unwrap();
