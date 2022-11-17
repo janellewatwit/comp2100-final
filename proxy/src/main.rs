@@ -1,7 +1,7 @@
 use std::{net::{TcpListener, TcpStream}, io::{Write, Read, BufReader, BufRead}};
 
 fn check_blacklisted_ip(ip: &std::net::IpAddr) -> bool {
-	let mut file = std::fs::File::open("../blacklist").unwrap();
+	let mut file = std::fs::File::open("./blacklist").unwrap();
 	let mut contents = String::new();
 	file.read_to_string(&mut contents).unwrap();
 	let blacklisted_ips: Vec<String> = contents.split("\n").map(|s: &str| s.to_string()).collect();
@@ -17,7 +17,16 @@ fn handle_client(mut incoming_stream: TcpStream) {
 		incoming_stream.write(b"Bad ip\n").unwrap();
 		return;
 	}
-	let mut outgoing_stream = TcpStream::connect("127.0.0.1:10000").unwrap();
+
+	let mut outgoing_stream = match TcpStream::connect("origin:10000") {
+		Ok(stream) => stream,
+		Err(e) => {
+			println!("Failed to connect to origin server!");
+			println!("{}", e);
+			return;
+		}
+	};
+
 	outgoing_stream.write(b"howdy\n").unwrap();
 	outgoing_stream.write(b"\n").unwrap();
 
@@ -34,7 +43,8 @@ fn handle_client(mut incoming_stream: TcpStream) {
 }
 
 fn main() -> std::io::Result<()> {
-	let listener = TcpListener::bind("127.0.0.1:20000")?;
+	let listener = TcpListener::bind("0.0.0.0:20000")?;
+	println!("Started listening on :20000");
 
 	// accept connections and process them serially
 	for stream in listener.incoming() {

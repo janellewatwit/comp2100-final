@@ -18,7 +18,8 @@ fn handle_client(mut stream: TcpStream) {
 }
 
 fn main() -> std::io::Result<()> {
-	let listener = TcpListener::bind("127.0.0.1:10000")?;
+	let listener = TcpListener::bind("0.0.0.0:10000")?;
+	println!("Started listening on :10000");
 
 	// accept connections and process them serially
 	for stream in listener.incoming() {

@@ -1,3 +1,12 @@
 services:
   origin:
     build: origin
+
+  proxy:
+    build: proxy
+    volumes:
+      - ${PWD}/blacklist:/app/blacklist
+    links:
+      - origin
+    ports:
+      - 20000:20000
