@@ -1,7 +1,11 @@
 pub mod origin_server;
-pub mod common;
+pub mod read_tcp;
+pub mod listen;
 
+/**
+ * Run the origin_server
+ */
 fn main()
 {
-	common::listen(10000, origin_server::handle_stream);
+	listen::listen(10000, origin_server::handle_stream);
 }
