@@ -3,10 +3,8 @@ use std::{
 	io::Write
 };
 
-/**
- * Reply "Hello World!" to any incoming TCP stream.
- * Log incoming message contents.
- */
+/// Reply "Hello World!" to any incoming TCP stream.
+/// Log incoming message contents.
 pub fn handle_stream(mut stream: TcpStream)
 {
 	let ip = stream.peer_addr().unwrap().ip();

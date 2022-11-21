@@ -3,15 +3,19 @@ use std::{
 	net::TcpStream,
 };
 
+/// If the incoming TcpStream does not come from a blacklisted
+/// ip, forwards an incoming message from the client to the
+/// origin server, then forwards the response from the origin
+/// server back to the client. Afterwards, terminates the connection.
 pub fn handle_proxy(mut client_stream: TcpStream)
 {
 	// Get client's IP
-	let ip = client_stream.peer_addr().unwrap();
-	println!("Received TCP connection from: {:?}", ip.ip());
+	let ip = client_stream.peer_addr().unwrap().ip();
+	println!("Received TCP connection from: {:?}", ip);
 	// Check if IP is blacklisted
-	if crate::blacklist::check_blacklisted_ip(&ip.ip())
+	if crate::blacklist::check_blacklisted_ip(&ip)
 	{
-		println!("{} is blacklisted. Closing connection", ip.ip());
+		println!("{} is blacklisted. Closing connection", ip);
 		client_stream.write(b"Your IP address is blacklisted.\n").unwrap();
 		return;
 	}
@@ -38,6 +42,7 @@ pub fn handle_proxy(mut client_stream: TcpStream)
 	forward_tcp(&origin_stream, &mut client_stream);
 }
 
+/// Forward a TCP message from one stream to another.
 fn forward_tcp(from: &TcpStream, to: &mut TcpStream)
 {
 	let mut reader = BufReader::new(from);
