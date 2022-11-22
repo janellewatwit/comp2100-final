@@ -1,6 +1,6 @@
 use std::{
-	io::{BufRead, BufReader, Write},
-	net::TcpStream,
+	io::{Write},
+	net::TcpStream, thread::sleep,
 };
 
 /// If the incoming TcpStream does not come from a blacklisted
@@ -20,9 +20,6 @@ pub fn handle_proxy(mut client_stream: TcpStream)
 		return;
 	}
 
-	// Log incoming request from client
-	// crate::common::log_tcpread(&client_stream, ip.ip());
-
 	// Open a connection to the Origin Server
 	let mut origin_stream = match TcpStream::connect("origin:10000")
 	{
@@ -34,27 +31,22 @@ pub fn handle_proxy(mut client_stream: TcpStream)
 			return;
 		}
 	};
+	// brief pause for pretty output
+	sleep(std::time::Duration::from_millis(50));
 
 	// Forward request from Client to Origin Server
-	forward_tcp(&client_stream, &mut origin_stream);
+	let request = crate::read_tcp::read_stream(&client_stream);
+	print!("From {} |\n{}", ip, request);
+	// brief pause for pretty output
+	sleep(std::time::Duration::from_millis(50));
+	origin_stream.write(request.as_bytes()).unwrap();
+
+
+	// brief pause for pretty output
+	sleep(std::time::Duration::from_millis(50));
 
 	// Forward response from Origin Server to Client
-	forward_tcp(&origin_stream, &mut client_stream);
-}
-
-/// Forward a TCP message from one stream to another.
-fn forward_tcp(from: &TcpStream, to: &mut TcpStream)
-{
-	let mut reader = BufReader::new(from);
-	loop
-	{
-		let mut as_str = String::new();
-		reader.read_line(&mut as_str).unwrap();
-		print!("From {} | {}", from.peer_addr().unwrap().ip(), as_str);
-		to.write(as_str.as_bytes()).unwrap();
-		if as_str.len() < 3
-		{
-			break;
-		}
-	}
+	let response = crate::read_tcp::read_stream(&origin_stream);
+	print!("From {} |\n{}", ip, response);
+	client_stream.write(response.as_bytes()).unwrap();
 }
