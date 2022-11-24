@@ -16,7 +16,7 @@ pub fn handle_proxy(mut client_stream: TcpStream)
 	if crate::blacklist::check_blacklisted_ip(&ip)
 	{
 		println!("{} is blacklisted. Closing connection", ip);
-		client_stream.write(b"Your IP address is blacklisted.\n").unwrap();
+		client_stream.write(b"Your IP address is blacklisted.\n\n").unwrap();
 		return;
 	}
 
